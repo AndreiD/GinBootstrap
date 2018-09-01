@@ -1,8 +1,16 @@
-FROM golang:1.10
-WORKDIR /go/src/github.com/AndreiD/GinBootstrap
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build .
+FROM golang:1.10 AS builder
+
+# Download and install the latest release of dep
+ADD https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 /usr/bin/dep
+RUN chmod +x /usr/bin/dep
+
+# Copy the code from the host and compile it
+WORKDIR $GOPATH/src/github.com/AndreiD/GinBootstrap
+COPY Gopkg.toml Gopkg.lock ./
+RUN dep ensure --vendor-only
+COPY . ./
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix nocgo -o /app .
 
 FROM scratch
-COPY --from=0 /go/src/github.com/AndreiD/GinBootstrap .
-ENTRYPOINT ["/main"]
+COPY --from=builder /app ./
+ENTRYPOINT ["./app"]
