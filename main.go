@@ -38,9 +38,10 @@ func main() {
 	//tools.Connect("_theDb.db")
 	//tools.MySQLConnect()
 
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-	fmt.Println("~~~~~~~~~~~~ SERVER IS RUNNING v: 0.01 ~~~~~~~~~~~~~~~~~")
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+	fmt.Printf("SERVER IS RUNNING v: 0.01 %s\n", Config.GetString("environment"))
+	fmt.Printf("Hostname: %s Port: %d\n", Config.GetString("hostname"), Config.GetInt("port"))
+	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 	// Serve 'em...
 	server := &http.Server{

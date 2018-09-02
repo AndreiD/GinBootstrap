@@ -12,7 +12,7 @@ func readConfig(filename string, defaults map[string]interface{}) (*viper.Viper,
 		v.SetDefault(key, value)
 	}
 	v.SetConfigName(filename)
-	v.AddConfigPath("./configs")
+	v.AddConfigPath("./config")
 	v.AutomaticEnv()
 	err := v.ReadInConfig()
 	return v, err
@@ -20,7 +20,7 @@ func readConfig(filename string, defaults map[string]interface{}) (*viper.Viper,
 
 func Load() *viper.Viper {
 	// Configs
-	Config, err := readConfig("api_config", map[string]interface{}{
+	Config, err := readConfig("config", map[string]interface{}{
 		"port":        9090,
 		"hostname":    "localhost",
 		"environment": "debug",
