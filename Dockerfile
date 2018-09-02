@@ -13,6 +13,6 @@ COPY . ./
 RUN go get -d ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -o backend .
 
-#FROM scratch
-#COPY ./backend /backend
-#ENTRYPOINT ["./backend"]
+FROM scratch
+COPY backend /backend
+ENTRYPOINT ["./backend"]
