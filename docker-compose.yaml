@@ -7,3 +7,5 @@ services:
     - .:$GOPATH/src/github.com/AndreiD/GinBootstrap
     working_dir: $GOPATH/src/github.com/AndreiD/GinBootstrap
     command: go run main.go
+    ports:
+      - "8080:8080"
