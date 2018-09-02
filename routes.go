@@ -1,6 +1,6 @@
 package main
 
-import "github.com/motionwerkGmbH/cpo-backend-api/handlers"
+import "github.com/AndreiD/GinBootstrap/handlers"
 
 func InitializeRoutes() {
 

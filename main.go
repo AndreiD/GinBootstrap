@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/motionwerkGmbH/cpo-backend-api/configs"
+	"github.com/AndreiD/GinBootstrap/config"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,7 +16,7 @@ var router *gin.Engine
 
 func main() {
 
-	Config := configs.Load()
+	Config := config.Load()
 
 	if (Config.GetString("environment")) == "debug" {
 		gin.SetMode(gin.DebugMode)
