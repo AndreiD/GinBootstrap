@@ -5,7 +5,7 @@ FROM golang:1.11 AS builder
 #RUN chmod +x /usr/bin/dep
 
 # Copy the code from the host and compile it
-WORKDIR /
+WORKDIR $GOPATH/src/github.com/AndreiD/GinBootstrap
 #COPY Gopkg.toml Gopkg.lock ./
 #RUN dep ensure --vendor-only
 
