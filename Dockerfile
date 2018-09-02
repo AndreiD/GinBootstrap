@@ -5,7 +5,7 @@ FROM golang:1.11 AS builder
 #RUN chmod +x /usr/bin/dep
 
 # Copy the code from the host and compile it
-WORKDIR $GOPATH/src/github.com/AndreiD/GinBootstrap
+WORKDIR /
 #COPY Gopkg.toml Gopkg.lock ./
 #RUN dep ensure --vendor-only
 
@@ -15,6 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' 
 
 # In scratch, there is nothing, except the project binary
 FROM scratch
+LABEL maintainer="Andy <andy@motionwerk.com>"
 COPY --from=builder /go/bin/backend /bin/backend
 EXPOSE 3000
 ENTRYPOINT [ "/bin/backend" ]
