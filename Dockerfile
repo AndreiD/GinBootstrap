@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' 
 
 # In scratch, there is nothing, except the project binary
 FROM scratch
-COPY --from=build /go/bin/backend /bin/backend
+COPY --from=builder /go/bin/backend /bin/backend
 EXPOSE 3000
 ENTRYPOINT [ "/bin/backend" ]
 CMD [ "--produce" ]
