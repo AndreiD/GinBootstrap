@@ -8,10 +8,11 @@ FROM golang:1.11 AS builder
 WORKDIR $GOPATH/src/github.com/AndreiD/GinBootstrap
 #COPY Gopkg.toml Gopkg.lock ./
 #RUN dep ensure --vendor-only
-COPY . ./
-RUN go get -d ./...
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix netgo -o backend .
 
-FROM scratch
-COPY ./backend /backend
-ENTRYPOINT ["./backend"]
+RUN go get -d ./...
+COPY . ./
+RUN CGO_ENABLED=0 GOOS=linux go build -o backend .
+
+#FROM scratch
+#COPY ./backend /backend
+#ENTRYPOINT ["./backend"]
