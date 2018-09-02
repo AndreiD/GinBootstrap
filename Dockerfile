@@ -13,5 +13,5 @@ RUN go get -d ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix netgo -o backend .
 
 FROM scratch
-COPY --from=builder /backend ./
+COPY ./backend /backend
 ENTRYPOINT ["./backend"]
