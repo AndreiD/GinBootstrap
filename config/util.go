@@ -18,7 +18,7 @@ func readConfig(filename string, defaults map[string]interface{}) (*viper.Viper,
 	return v, err
 }
 
-func Load() *viper.Viper {d
+func Load() *viper.Viper {
 	// Configs
 	Config, err := readConfig("api_config", map[string]interface{}{
 		"port":        9090,
