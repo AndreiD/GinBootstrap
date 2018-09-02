@@ -1,11 +1,6 @@
-version: "3"
-
+version: '3'
 services:
-  app:
-    image: golang:1.11
-    volumes:
-    - .:$GOPATH/src/github.com/AndreiD/GinBootstrap
-    working_dir: $GOPATH/src/github.com/AndreiD/GinBootstrap
-    command: go run main.go
+  backend:
+    build: .
     ports:
-      - "8080:8080"
+    - "8080:8080"
