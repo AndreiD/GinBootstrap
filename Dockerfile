@@ -8,8 +8,8 @@ FROM golang:1.11-alpine AS builder
 WORKDIR $GOPATH/src/github.com/AndreiD/GinBootstrap
 #COPY Gopkg.toml Gopkg.lock ./
 #RUN dep ensure --vendor-only
-RUN go get -d ./...
 COPY . ./
+RUN go get -d ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix netgo -o backend .
 
 FROM scratch
