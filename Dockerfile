@@ -17,6 +17,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' 
 FROM scratch
 LABEL maintainer="Andy <andy@motionwerk.com>"
 COPY --from=builder /go/bin/backend /bin/backend
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 3000
 ENTRYPOINT [ "/bin/backend" ]
 CMD [ "--produce" ]
