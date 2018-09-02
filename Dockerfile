@@ -18,6 +18,6 @@ FROM scratch
 LABEL maintainer="Andy <andy@motionwerk.com>"
 COPY --from=builder /go/bin/backend /bin/backend
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-EXPOSE 3000
+EXPOSE 8080
 ENTRYPOINT [ "/bin/backend" ]
 CMD [ "--produce" ]
