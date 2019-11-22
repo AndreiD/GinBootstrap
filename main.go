@@ -1,57 +1,120 @@
 package main
 
 import (
-	"github.com/gin-gonic/contrib/static"
+	"changeme/configs"
+	"changeme/utils/log"
+	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/AndreiD/GinBootstrap/config"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
 	"time"
-	"github.com/gin-contrib/cors"
-	"fmt"
 )
+
+const version = "1.0 Alpha"
 
 var router *gin.Engine
 
+// Configuration .
+var configuration *configs.ViperConfiguration
+
+func init() {
+
+	configuration = configs.NewConfiguration()
+	configuration.Init()
+
+	debug := configuration.GetBool("debug")
+	log.Init(debug)
+
+	log.Println("==================================================")
+	log.Println("Starting YOUR BACKEND version: " + version)
+	log.Println("==================================================")
+	log.Println()
+}
+
 func main() {
 
-	Config := config.Load()
+	router = gin.New()
 
-	if (Config.GetString("environment")) == "debug" {
+	if configuration.GetBool("debug") {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	router = gin.New()
+
+	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Use(requestIDMiddleware())
+	router.Use(corsMiddleware())
+	router.Use(configurationMiddleware(configuration))
 
-	// allow all origins
-	router.Use(cors.Default())
+	InitializeRouter()
 
-	InitializeRoutes()
-
-	// Serve static invoices files
-	router.Use(static.Serve("/static", static.LocalFile("./static", true)))
-
-	// Establish database connection
-	//tools.Connect("_theDb.db")
-	//tools.MySQLConnect()
-
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-	fmt.Printf("SERVER IS RUNNING v: 0.01 %s\n", Config.GetString("environment"))
-	fmt.Printf("Hostname: %s Port: %d\n", Config.GetString("hostname"), Config.GetInt("port"))
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-
-	// Serve 'em...
 	server := &http.Server{
-		Addr:           Config.GetString("hostname") + ":" + strconv.Itoa(Config.GetInt("port")),
+		Addr:           configuration.Get("server.host") + ":" + strconv.Itoa(configuration.GetInt("server.port")),
 		Handler:        router,
-		ReadTimeout:    60 * time.Second,
-		WriteTimeout:   60 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+		ReadTimeout:    5 * time.Second,
+		WriteTimeout:   5 * time.Second,
+		MaxHeaderBytes: 1 << 10, // 1Mb
 	}
 	server.SetKeepAlivesEnabled(true)
-	server.ListenAndServe()
 
+	// Serve'em
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Printf("listen: %s\n", err)
+		}
+	}()
+
+	log.Printf("Running on %s:%s", configuration.Get("server.host"), strconv.Itoa(configuration.GetInt("server.port")))
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	log.Println("initiated server shutdown")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal("server shutdown:", err)
+	}
+	log.Println("server exiting. bye!")
+}
+
+// requestIDMiddleware adds x-request-id
+func requestIDMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("X-Request-Id", uuid.NewV4().String())
+		c.Next()
+	}
+}
+
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers",
+			"Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
+// configurationMiddleware will add the configuration to the context
+func configurationMiddleware(config *configs.ViperConfiguration) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("configuration", config)
+		c.Next()
+	}
 }

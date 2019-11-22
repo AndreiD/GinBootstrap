@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Index(c *gin.Context) {
-	c.String(http.StatusOK, "up & running")
+// Ping responds with pong
+func Ping(c *gin.Context) {
+	c.String(http.StatusOK, "pong")
 }
-

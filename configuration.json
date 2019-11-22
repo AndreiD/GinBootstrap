@@ -1,0 +1,11 @@
+{
+  "debug": true,
+  "nodeURL": "https://arweave.net",
+  "ipfsGateway": "https://ipfs.infura.io/ipfs/",
+  "walletFile": "/home/me/Documents/keys/arweave-wallet.json",
+  "cleanup": true,
+  "server": {
+    "host": "localhost",
+    "port": 5555
+  }
+}

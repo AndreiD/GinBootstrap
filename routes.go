@@ -1,15 +1,12 @@
 package main
 
-import "github.com/AndreiD/GinBootstrap/handlers"
+import "changeme/handlers"
 
-func InitializeRoutes() {
+func InitializeRouter() {
 
-	v1 := router.Group("/api/v1")
-	{
-		//~~~~~~~~~~~~~~~~~~~~ GENERAL STUFF ~~~~~~~~~~~~~~~~~~~~~~
+	api := router.Group("/api")
 
-		v1.GET("/", handlers.Index)
-
-	}
+	// pong
+	api.GET("/ping", handlers.Ping)
 
 }

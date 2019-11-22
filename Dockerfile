@@ -1,23 +1,25 @@
-FROM golang:1.11 AS builder
+FROM golang:1.12-alpine AS build_base
+RUN apk add --no-cache bash ca-certificates make gcc git libc-dev
 
-# Download and install the latest release of dep
-#ADD https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 /usr/bin/dep
-#RUN chmod +x /usr/bin/dep
+RUN mkdir -p /build
+COPY configuration.json /build
 
-# Copy the code from the host and compile it
-WORKDIR $GOPATH/src/github.com/AndreiD/GinBootstrap
-#COPY Gopkg.toml Gopkg.lock ./
-#RUN dep ensure --vendor-only
+WORKDIR /build
 
-COPY . ./
-RUN go get -d ./...
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w' -o /go/bin/backend
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
-# In scratch, there is nothing, except the project binary
-FROM scratch
-LABEL maintainer="Andy <andy@motionwerk.com>"
-COPY --from=builder /go/bin/backend /bin/backend
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-EXPOSE 8080
-ENTRYPOINT [ "/bin/backend" ]
-CMD [ "--production" ]
+FROM build_base AS server_builder
+COPY . .
+COPY configuration.json /build/configuration.json
+
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /build/iab
+
+
+FROM alpine:latest AS runtime
+RUN apk add ca-certificates
+COPY --from=server_builder /build/iab /build/
+COPY --from=server_builder /build/configuration.json /
+EXPOSE 5555
+ENTRYPOINT ["/build/iab"]
